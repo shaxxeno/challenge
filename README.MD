@@ -1,6 +1,14 @@
+# From Dmytro
+
+access swagger docs: http://127.0.0.1:8000/docs/
+
+frontend-stripe review:
+
+- The frontend code handles Stripe subscriptions by defining a usePay hook that determines the appropriate price based on the subscription type (individual, group, business) and application type (world, universe). It then uses the Stripe API to redirect the user to the Stripe checkout page with the correct pricing details. Additionally, the useStripe hook fetches and sets the user's subscription data using an authenticated Axios instance. The integration ensures that only logged-in users can initiate payments and fetch subscription details.
+
 # Django and React Authentication with JWT and Stripe payment
 
-The project consists of two directories: 
+The project consists of two directories:
 
 - `client`: Contains the React application
 - `server`: Contains the Django backend
@@ -20,63 +28,64 @@ Ensure you have the following installed on your local machine:
 ### Setup
 
 1. Clone the repository:
-    ```
-    git clone https://github.com/<yourusername>/<yourrepository>.git
-    ```
+   ```
+   git clone https://github.com/<yourusername>/<yourrepository>.git
+   ```
 2. Change into the directory:
-    ```
-    cd <yourrepository>
-    ```
+   ```
+   cd <yourrepository>
+   ```
 
 ### Server
 
 1. Navigate to the `server` directory:
-    ```
-    cd server
-    ```
+   ```
+   cd server
+   ```
 2. Install Django and other dependencies:
-    ```
-    pip install -r requirements.txt
-    ```
+   ```
+   pip install -r requirements.txt
+   ```
 3. Create a virtual environment (Optional but recommended):
-    ```
-    python -m venv env
-    ```
+   ```
+   python -m venv env
+   ```
 4. Activate the virtual environment:
-    On Windows:
-    ```
-    .\env\Scripts\activate
-    ```
-    On MacOS/Linux:
-    ```
-    source env/bin/activate
-    ```
+   On Windows:
+   ```
+   .\env\Scripts\activate
+   ```
+   On MacOS/Linux:
+   ```
+   source env/bin/activate
+   ```
 5. Create a `.env` file in the `server/core` directory and add stripe secret key and prices (copy from .env.example)
 
 ### Client
 
 1. Navigate to the `client` directory:
-    ```
-    cd ../client
-    ```
+   ```
+   cd ../client
+   ```
 2. Install all the dependencies:
-    ```
-    npm install
-    ```
+   ```
+   npm install
+   ```
 3. Create `index.js` in `client/src/config` directory and add stripe key and prices (copy from index.js.example)
 4. Run the client:
-    ```
-    npm start
-    ```
+   ```
+   npm start
+   ```
 
 Now, your application should be running at `localhost:3000`.
 
 Note:
+
 - The Django server should be running at the same time as the React application for the system to function properly.
 - The application uses the email field instead of the username field for user identification.
 
-
 # Task
+
 - Clone this project to your local and Run this project successfully
 - Review how the frontend and stripe subscriptions are working
 - Add Swagger or Redoc API documentation for Django restful API endpoints (Write down well-organized and well-documented API reference)

@@ -6,6 +6,9 @@ from rest_framework_simplejwt import tokens, views as jwt_views, serializers as 
 from user import serializers, models
 import stripe
 
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
+
 stripe.api_key = settings.STRIPE_SECRET_KEY
 prices = {
     settings.WORLD_INDIVIDUAL: "world_individual",
@@ -24,6 +27,24 @@ def get_user_tokens(user):
         "access_token": str(refresh.access_token)
     }
 
+@swagger_auto_schema(
+    method='post',
+    operation_description="Authenticate user and set JWT tokens in cookies.",
+    request_body=serializers.LoginSerializer,
+    responses={
+        200: openapi.Response(
+            description="Successful login with JWT tokens in cookies.",
+            examples={
+                'application/json': {
+                    'access_token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...',
+                    'refresh_token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...'
+                }
+            }
+        ),
+        401: "Unauthorized - Invalid email or password",
+        500: "Server error"
+    }
+)
 
 @rest_decorators.api_view(["POST"])
 @rest_decorators.permission_classes([])
@@ -63,6 +84,15 @@ def loginView(request):
     raise rest_exceptions.AuthenticationFailed(
         "Email or Password is incorrect!")
 
+@swagger_auto_schema(
+    method='post',
+    operation_description="Register a new user.",
+    request_body=serializers.RegistrationSerializer,
+    responses={
+        200: "Registered successfully",
+        400: "Bad request - Invalid credentials"
+    }
+)
 
 @rest_decorators.api_view(["POST"])
 @rest_decorators.permission_classes([])
@@ -76,6 +106,15 @@ def registerView(request):
         return response.Response("Registered!")
     return rest_exceptions.AuthenticationFailed("Invalid credentials!")
 
+@swagger_auto_schema(
+    method='post',
+    operation_description="Logout user and blacklist refresh token.",
+    responses={
+        200: "Logged out successfully",
+        400: "Bad request - Invalid token",
+        500: "Server error"
+    }
+)
 
 @rest_decorators.api_view(['POST'])
 @rest_decorators.permission_classes([rest_permissions.IsAuthenticated])
@@ -112,6 +151,18 @@ class CookieTokenRefreshSerializer(jwt_serializers.TokenRefreshSerializer):
 
 class CookieTokenRefreshView(jwt_views.TokenRefreshView):
     serializer_class = CookieTokenRefreshSerializer
+    
+    @swagger_auto_schema(
+    operation_description="Refresh JWT tokens using refresh token from cookies.",
+    responses={
+        200: openapi.Response(
+            description="Token refreshed successfully",
+            schema=jwt_serializers.TokenRefreshSerializer
+        ),
+        400: "Bad request - Invalid token",
+        500: "Server error"
+    }
+    )
 
     def finalize_response(self, request, response, *args, **kwargs):
         if response.data.get("refresh"):
@@ -128,6 +179,18 @@ class CookieTokenRefreshView(jwt_views.TokenRefreshView):
         response["X-CSRFToken"] = request.COOKIES.get("csrftoken")
         return super().finalize_response(request, response, *args, **kwargs)
 
+@swagger_auto_schema(
+    method='get',
+    operation_description="Retrieve authenticated user's details.",
+    responses={
+        200: openapi.Response(
+            description="User details retrieved successfully",
+            schema=serializers.UserSerializer
+        ),
+        404: "User not found",
+        500: "Server error"
+    }
+)
 
 @rest_decorators.api_view(["GET"])
 @rest_decorators.permission_classes([rest_permissions.IsAuthenticated])
@@ -140,6 +203,28 @@ def user(request):
     serializer = serializers.UserSerializer(user)
     return response.Response(serializer.data)
 
+@swagger_auto_schema(
+    method='get',
+    operation_description="Retrieve the authenticated user's active subscriptions.",
+    responses={
+        200: openapi.Response(
+            description="Active subscriptions retrieved successfully",
+            examples={
+                'application/json': {
+                    'subscriptions': [
+                        {
+                            'id': 'sub_1GqIC8HGSJg4W9qF5YpTz7jY',
+                            'start_date': '2023-06-21',
+                            'plan': 'world_individual'
+                        }
+                    ]
+                }
+            }
+        ),
+        404: "User not found",
+        500: "Server error"
+    }
+)
 
 @rest_decorators.api_view(["GET"])
 @rest_decorators.permission_classes([rest_permissions.IsAuthenticated])

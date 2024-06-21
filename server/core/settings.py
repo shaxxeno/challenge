@@ -58,10 +58,23 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework',
     'rest_framework_simplejwt.token_blacklist',
+    'drf_yasg',
 
     # Apps
     'user',
 ]
+
+SWAGGER_SETTINGS = {
+    'SECURITY_DEFINITIONS': {
+        'Bearer': {
+            'type': 'apiKey',
+            'name': 'Authorization',
+            'in': 'header',
+            'description': 'JWT Authorization header using the Bearer scheme. Example: "Authorization: Bearer {token}"',
+        }
+    },
+}
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
